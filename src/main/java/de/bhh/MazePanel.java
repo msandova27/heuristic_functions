@@ -2,44 +2,135 @@ package de.bhh;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
 
 public class MazePanel extends JPanel {
-    private final int[][] maze = {
-            {1, 1, 1, 1, 1},
-            {1, 0, 0, 0, 1},
-            {1, 0, 1, 0, 1},
-            {1, 0, 1, 0, 1},
-            {1, 1, 1, 1, 1}
-    };
 
-    private final int[][] LargeMaze = new int[20][20];
+    private static final int ROWS = 19;
+    private static final int COLUMNS = 20;
+    private static final int TILE_SIZE = 50;
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        Arrays.stream(LargeMaze).forEach(a -> Arrays.fill(a, 1));
-        int[][] currentMaze = LargeMaze;
-        super.paintComponent(g);
-        int cellSize = 50;
-        for (int y = 0; y < currentMaze.length; y++) {
-            for (int x = 0; x < currentMaze[0].length; x++) {
-                if (currentMaze[y][x] == 1) {
-                    g.setColor(Color.BLACK);
-                } else {
-                    g.setColor(Color.WHITE);
-                }
-                g.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                g.setColor(Color.GRAY);
-                g.drawRect(x * cellSize, y * cellSize, cellSize, cellSize);
+    private static Node start = new Node(0, 0);
+    private static Node goal = new Node(10, ROWS - 1);
+    private static Node current;
+
+    private static boolean pathFound = false;
+    private static LinkedList<Node> path = new LinkedList<Node>();
+
+    private static PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparingInt(Node::getF));
+    private static HashSet<Node> closedSet = new HashSet<>();
+
+    private static Node[][] maze = initMaze();
+
+
+    private static Node[][] initMaze() {
+        Node[][] newMaze = new Node[ROWS][COLUMNS];
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                newMaze[i][j] = new Node(j, i);
             }
+        }
+        return newMaze;
+    }
+
+    private static int calculateManhattanDistance(Node current) {
+        return Math.abs(current.getX() - goal.getX()) + Math.abs(current.getY() - goal.getY());
+    }
+
+    private static void initPathFinding() {
+        start.setG(0);
+        start.setF(start.getG() + calculateManhattanDistance(start));
+        openSet.add(start);
+    }
+
+    private void nextStep() {
+
+        if (openSet.isEmpty() || pathFound) {
+            return;
+        }
+
+        current = openSet.poll();
+        closedSet.add(current);
+
+        if (current.equals(goal)) {
+            pathFound = true;
+            calculatePath();
+            repaint();
+            return;
+        }
+
+
+        for (Node neighbor : current.getNeighbors(maze)) {
+            if (closedSet.contains(neighbor)) {
+                continue;
+            }
+
+            int tentativeG = current.getG() + 1;
+            if (tentativeG < neighbor.getG()) {
+                neighbor.setPrev(current);
+                neighbor.setG(tentativeG);
+                neighbor.setF(neighbor.getG() + calculateManhattanDistance(neighbor));
+
+                if (!openSet.contains(neighbor)) {
+                    openSet.add(neighbor);
+                }
+            }
+        }
+        repaint();
+    }
+
+    private static void calculatePath() {
+        Node cur = current.getPrev();
+        while (cur.getPrev() != null) {
+            path.add(cur);
+            cur = cur.getPrev();
         }
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Maze");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(550, 550);
-        frame.add(new MazePanel());
-        frame.setVisible(true);
+
+@Override
+protected void paintComponent(Graphics g) {
+
+    super.paintComponent(g);
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLUMNS; x++) {
+            Node node = maze[y][x];
+
+            if (node == null) {
+                g.setColor(Color.WHITE);
+            } else if (node.equals(start) || node.equals(goal)) {
+                g.setColor(Color.GREEN);
+            } else if (node.equals(current)) {
+                g.setColor(Color.BLUE);
+            } else if (path.contains(node)) {
+                g.setColor(Color.RED);
+            } else if (closedSet.contains(node)) {
+                g.setColor(Color.LIGHT_GRAY);
+            } else if (openSet.contains(node)) {
+                g.setColor(Color.ORANGE);
+            } else {
+                g.setColor(Color.WHITE);
+            }
+            g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            g.setColor(Color.GRAY);
+            g.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        }
     }
+}
+
+public static void main(String[] args) {
+    JFrame frame = new JFrame("Maze");
+    MazePanel panel = new MazePanel();
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(550, 550);
+    frame.add(panel);
+    frame.setVisible(true);
+
+    initPathFinding();
+
+    new javax.swing.Timer(100, e -> panel.nextStep()).start();
+}
 }
