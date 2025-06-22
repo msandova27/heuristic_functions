@@ -13,7 +13,7 @@ public class MazePanel extends JPanel {
     private static final int COLUMNS = 20;
     private static final int TILE_SIZE = 50;
 
-    private static Node start = new Node(0, 0);
+    private static Node start = new Node(0, 2);
     private static Node goal = new Node(10, ROWS - 1);
     private static Node current;
 
@@ -62,7 +62,6 @@ public class MazePanel extends JPanel {
             return;
         }
 
-
         for (Node neighbor : current.getNeighbors(maze)) {
             if (closedSet.contains(neighbor)) {
                 continue;
@@ -91,46 +90,46 @@ public class MazePanel extends JPanel {
     }
 
 
-@Override
-protected void paintComponent(Graphics g) {
+    @Override
+    protected void paintComponent(Graphics g) {
 
-    super.paintComponent(g);
-    for (int y = 0; y < ROWS; y++) {
-        for (int x = 0; x < COLUMNS; x++) {
-            Node node = maze[y][x];
+        super.paintComponent(g);
+        for (int y = 0; y < ROWS; y++) {
+            for (int x = 0; x < COLUMNS; x++) {
+                Node node = maze[y][x];
 
-            if (node == null) {
-                g.setColor(Color.WHITE);
-            } else if (node.equals(start) || node.equals(goal)) {
-                g.setColor(Color.GREEN);
-            } else if (node.equals(current)) {
-                g.setColor(Color.BLUE);
-            } else if (path.contains(node)) {
-                g.setColor(Color.RED);
-            } else if (closedSet.contains(node)) {
-                g.setColor(Color.LIGHT_GRAY);
-            } else if (openSet.contains(node)) {
-                g.setColor(Color.ORANGE);
-            } else {
-                g.setColor(Color.WHITE);
+                if (node == null) {
+                    g.setColor(Color.WHITE);
+                } else if (node.equals(start) || node.equals(goal)) {
+                    g.setColor(Color.GREEN);
+                } else if (node.equals(current)) {
+                    g.setColor(Color.BLUE);
+                } else if (path.contains(node)) {
+                    g.setColor(Color.RED);
+                } else if (closedSet.contains(node)) {
+                    g.setColor(Color.LIGHT_GRAY);
+                } else if (openSet.contains(node)) {
+                    g.setColor(Color.ORANGE);
+                } else {
+                    g.setColor(Color.WHITE);
+                }
+                g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                g.setColor(Color.GRAY);
+                g.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }
-            g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-            g.setColor(Color.GRAY);
-            g.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         }
     }
-}
 
-public static void main(String[] args) {
-    JFrame frame = new JFrame("Maze");
-    MazePanel panel = new MazePanel();
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setSize(550, 550);
-    frame.add(panel);
-    frame.setVisible(true);
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Maze");
+        MazePanel panel = new MazePanel();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(550, 550);
+        frame.add(panel);
+        frame.setVisible(true);
 
-    initPathFinding();
+        initPathFinding();
 
-    new javax.swing.Timer(100, e -> panel.nextStep()).start();
-}
+        new javax.swing.Timer(100, e -> panel.nextStep()).start();
+    }
 }

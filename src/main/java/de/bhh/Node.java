@@ -53,8 +53,8 @@ public class Node {
             int neighborX = x + dir[0];
             int neighborY = y + dir[1];
 
-            boolean isPossibleX = neighborX > -1 && neighborX < maze.length;
-            boolean isPossibleY = neighborY > -1 && neighborY < maze[0].length;
+            boolean isPossibleX = neighborX > -1 && neighborX < maze[0].length;
+            boolean isPossibleY = neighborY > -1 && neighborY < maze.length;
             if (isPossibleY && isPossibleX) {
                 neighbors.add(maze[neighborY][neighborX]);
             }
