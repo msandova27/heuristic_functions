@@ -9,7 +9,7 @@ import java.util.PriorityQueue;
 
 public class MazePanel extends JPanel {
 
-    private static final int ROWS = 19;
+    private static final int ROWS = 20;
     private static final int COLUMNS = 20;
     private static final int TILE_SIZE = 50;
 
@@ -124,7 +124,7 @@ public class MazePanel extends JPanel {
         JFrame frame = new JFrame("Maze");
         MazePanel panel = new MazePanel();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(550, 550);
+        frame.setSize(1050, 1050);
         frame.add(panel);
         frame.setVisible(true);
 
